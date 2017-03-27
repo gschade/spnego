@@ -41,10 +41,16 @@ import org.ietf.jgss.GSSCredential;
  *
  */
 final class SpnegoHttpServletRequest extends HttpServletRequestWrapper 
-    implements DelegateServletRequest {
+    implements DelegateServletRequest, SpnegoAccessControl {
+    
+    private static final String MESSAGE_UNSUPPORTED = 
+            "User Access Control has NOT been defined or is NOT supported.";
     
     /** Client Principal. */
     private final transient SpnegoPrincipal principal;
+    
+    /** authZ framework interface. */
+    private final transient UserAccessControl accessControl;
     
     /**
      * Creates Servlet Request specifying KerberosPrincipal of user.
@@ -55,9 +61,24 @@ final class SpnegoHttpServletRequest extends HttpServletRequestWrapper
     SpnegoHttpServletRequest(final HttpServletRequest request
         , final SpnegoPrincipal spnegoPrincipal) {
         
+        this(request, spnegoPrincipal, null);
+    }
+    
+    /**
+     * Creates Servlet Request specifying KerberosPrincipal of user 
+     * and a specified User Access Control (authZ).
+     * @param request
+     * @param spnegoPrincipal
+     * @param userAccessControl
+     */
+    SpnegoHttpServletRequest(final HttpServletRequest request
+        , final SpnegoPrincipal spnegoPrincipal
+        , final UserAccessControl userAccessControl) {
+        
         super(request);
         
         this.principal = spnegoPrincipal;
+        this.accessControl = userAccessControl;
     }
     
     /**
@@ -71,9 +92,12 @@ final class SpnegoHttpServletRequest extends HttpServletRequestWrapper
         final String authType;
         final String header = this.getHeader(Constants.AUTHZ_HEADER);
         
-        if (header.startsWith(Constants.NEGOTIATE_HEADER)) {
-            authType = Constants.NEGOTIATE_HEADER;
+        if (null == header) {
+            authType = super.getAuthType();
             
+        } else if (header.startsWith(Constants.NEGOTIATE_HEADER)) {
+            authType = Constants.NEGOTIATE_HEADER;
+
         } else if (header.startsWith(Constants.BASIC_HEADER)) {
             authType = Constants.BASIC_HEADER;
             
@@ -84,11 +108,11 @@ final class SpnegoHttpServletRequest extends HttpServletRequestWrapper
         return authType;
     }
     
-    /**
-     * Return the client's/requester's delegated credential or null.
-     * 
-     * @return client's delegated credential or null.
+    /*
+     * (non-Javadoc)
+     * @see net.sourceforge.spnego.DelegateServletRequest#getDelegatedCredential()
      */
+    @Override
     public GSSCredential getDelegatedCredential() {
         return this.principal.getDelegatedCredential();
     }
@@ -118,5 +142,99 @@ final class SpnegoHttpServletRequest extends HttpServletRequestWrapper
     @Override
     public Principal getUserPrincipal() {
         return this.principal;
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see net.sourceforge.spnego.SpnegoAccessControl#anyRole(java.lang.String[])
+     */
+    @Override
+    public boolean anyRole(final String... roles) {
+        if (null == this.accessControl) {
+            throw new UnsupportedOperationException(MESSAGE_UNSUPPORTED);
+        }
+        
+        return this.accessControl.anyRole(this.getRemoteUser(), roles);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see net.sourceforge.spnego.SpnegoAccessControl#hasRole(java.lang.String)
+     */
+    @Override
+    public boolean hasRole(final String role) {
+        if (null == this.accessControl) {
+            throw new UnsupportedOperationException(MESSAGE_UNSUPPORTED);
+        }
+        
+        return this.accessControl.hasRole(this.getRemoteUser(), role);        
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see net.sourceforge.spnego.SpnegoAccessControl#hasRole(java.lang.String, java.lang.String[])
+     */
+    @Override
+    public boolean hasRole(final String featureX, final String... featureYs) {
+        // assert
+        if (null == this.accessControl) {
+            throw new UnsupportedOperationException(MESSAGE_UNSUPPORTED);
+        }
+        
+        return this.accessControl.hasRole(this.getRemoteUser(), featureX, featureYs);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see net.sourceforge.spnego.SpnegoAccessControl#anyAccess(java.lang.String[])
+     */
+    @Override
+    public boolean anyAccess(final String... resources) {
+        if (null == this.accessControl) {
+            throw new UnsupportedOperationException(MESSAGE_UNSUPPORTED);
+        }
+        
+        return this.accessControl.anyAccess(this.getRemoteUser(), resources);        
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see net.sourceforge.spnego.SpnegoAccessControl#hasAccess(java.lang.String)
+     */
+    @Override
+    public boolean hasAccess(final String resource) {
+     // assert
+        if (null == this.accessControl) {
+            throw new UnsupportedOperationException(MESSAGE_UNSUPPORTED);
+        }
+        
+        return this.accessControl.hasAccess(this.getRemoteUser(), resource);
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see net.sourceforge.spnego.SpnegoAccessControl#hasAccess(java.lang.String, java.lang.String[])
+     */
+    @Override
+    public boolean hasAccess(final String resourceX, final String... resourceYs) {
+        // assert
+        if (null == this.accessControl) {
+            throw new UnsupportedOperationException(MESSAGE_UNSUPPORTED);
+        }
+        
+        return this.accessControl.hasAccess(this.getRemoteUser(), resourceX, resourceYs);        
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see javax.servlet.http.HttpServletRequestWrapper#isUserInRole(java.lang.String)
+     */
+    @Override
+    public boolean isUserInRole(final String role) {
+        if (null == this.accessControl) {
+            throw new UnsupportedOperationException(MESSAGE_UNSUPPORTED);
+        }
+        
+        return this.accessControl.hasRole(this.getRemoteUser(), role);
     }
 }
