@@ -224,6 +224,26 @@ final class SpnegoHttpServletRequest extends HttpServletRequestWrapper
         
         return this.accessControl.hasAccess(this.getRemoteUser(), resourceX, resourceYs);        
     }
+
+    /*
+     * (non-Javadoc)
+     * @see net.sourceforge.spnego.SpnegoAccessControl#getUserInfo()
+     */
+    @Override
+    public UserInfo getUserInfo() {
+        // assert
+        if (null == this.accessControl) {
+            throw new UnsupportedOperationException(MESSAGE_UNSUPPORTED);
+        }
+        
+        final UserInfo userInfo = this.accessControl.getUserInfo(this.getRemoteUser());
+        
+        if (null == userInfo) {
+            throw new UnsupportedOperationException("UserInfo was NULL and/or not configured");
+        } else {
+            return userInfo;
+        }
+    }
     
     /*
      * (non-Javadoc)

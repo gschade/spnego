@@ -480,6 +480,13 @@ public interface UserAccessControl {
      * @return true if user has resourceX AND at least one the resourceYs
      */
     boolean hasAccess(final String username, final String resourceX, final String... resourceYs);
+    
+    /**
+     * Returns the user's info object for the given user.
+     * 
+     * @return the user's info object for the given user
+     */
+    UserInfo getUserInfo(final String username);
 
     /**
      * Method is used for initialization prior to use/calling any other method. 
