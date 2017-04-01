@@ -298,18 +298,18 @@ public final class SpnegoAuthenticator {
     public SpnegoPrincipal authenticate(final HttpServletRequest req
         , final SpnegoHttpServletResponse resp) throws GSSException
         , IOException {
-        
-        // determine if we allow basic
-        final boolean basicSupported = 
-            this.allowBasic && (this.allowUnsecure || req.isSecure());
-        
-        // domain/realm of server
-        final String serverRealm = this.serverPrincipal.getRealm();
-        
+                
         // Skip auth if localhost
         if (this.allowLocalhost && this.isLocalhost(req)) {
             return doLocalhost();
         }
+
+        // domain/realm of server
+        final String serverRealm = this.serverPrincipal.getRealm();
+        
+        // determine if we allow basic
+        final boolean basicSupported = 
+            this.allowBasic && (this.allowUnsecure || req.isSecure());
         
         final SpnegoPrincipal principal;
         final SpnegoAuthScheme scheme = SpnegoProvider.negotiate(

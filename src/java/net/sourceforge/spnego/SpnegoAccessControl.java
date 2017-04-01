@@ -317,4 +317,11 @@ public interface SpnegoAccessControl {
      * @return true if the user has resourceX AND at least one the resourceYs
      */
     boolean hasAccess(final String resourceX, final String... resourceYs);
+    
+    /**
+     * Returns the user's info object.
+     * 
+     * @return the user's info object
+     */
+    UserInfo getUserInfo();
 }

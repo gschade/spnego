@@ -329,7 +329,7 @@ public final class SpnegoHttpFilter implements Filter {
     
     private boolean exclude(final String contextPath, final String servletPath) {
         // each item in excludeDirs ends with a slash
-        final String path = contextPath + servletPath + ((servletPath.endsWith("/")) ? "" : "/");
+        final String path = contextPath + servletPath + (servletPath.endsWith("/") ? "" : "/");
         
         for (String dir : this.excludeDirs) {
             if (path.startsWith(dir)) {
