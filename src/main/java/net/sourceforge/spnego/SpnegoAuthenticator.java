@@ -21,6 +21,7 @@ package net.sourceforge.spnego;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.security.PrivilegedActionException;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -393,7 +394,10 @@ public final class SpnegoAuthenticator {
             return null;
         }
 
-        final String[] basicData = new String(data).split(":", 2);
+    	// PATCH: Der Netscaler liefert das basic-Auth-Token UTF-8 encodiert. Daher darf das Default-Encoding nicht verwendet werden.
+    	// Original:
+        // final String[] basicData = new String(data).split(":", 2);
+        final String[] basicData = new String(data, StandardCharsets.UTF_8).split(":", 2);
 
         // assert
         if (basicData.length != 2) {

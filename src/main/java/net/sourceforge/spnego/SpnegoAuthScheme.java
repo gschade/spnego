@@ -18,6 +18,8 @@
 
 package net.sourceforge.spnego;
 
+import java.nio.charset.StandardCharsets;
+
 import net.sourceforge.spnego.SpnegoHttpFilter.Constants;
 
 /**
@@ -110,6 +112,10 @@ final class SpnegoAuthScheme {
      * @return copy of token
      */
     byte[] getToken() {
-        return (null == this.token) ? EMPTY_BYTE_ARRAY : Base64.decode(this.token);
+    	// PATCH: Der Netscaler liefert das basic-Auth-Token UTF-8 encodiert. Daher darf das Default-Encoding nicht verwendet werden.
+    	// Original:
+    	// return (null == this.token) ? EMPTY_BYTE_ARRAY : Base64.decode(this.token);
+        return (null == this.token) ? EMPTY_BYTE_ARRAY : java.util.Base64.getDecoder().decode(this.token.getBytes(StandardCharsets.UTF_8));
+        
     }
 }
