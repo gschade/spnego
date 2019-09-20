@@ -1,0 +1,21 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+}
+
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'java'
+
+group = 'org.gschade'
+version = '1.0.0'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+compileJava.options.encoding = "UTF-8"
+
+dependencies {
+	compile "javax.servlet:javax.servlet-api:3.1.0"
+}
